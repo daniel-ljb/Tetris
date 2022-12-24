@@ -13,7 +13,7 @@ public class Board : MonoBehaviour
 
     private Piece currentPiece;
     private Piece[] nextPieces;
-    private Tile[,] deadCellMap;
+    private List<Tile[]> deadCellMap;
     private float nextSoftDrop;
     private float leftHeldStart;
     private float rightHeldStart;
@@ -24,7 +24,11 @@ public class Board : MonoBehaviour
     public void Start()
     {
         pieceList = this.gameObject.GetComponentInChildren<PieceList>();
-        deadCellMap = new Tile[10, 20];
+        deadCellMap = new List<Tile[]>();
+        for (int i = 0; i < 20; i++)
+        {
+            deadCellMap.Add(new Tile[10]);
+        }
 
         SpawnPiece();
         gravityTimer = Time.time + 0.95f;
@@ -58,7 +62,7 @@ public class Board : MonoBehaviour
     {
         foreach (Vector2Int cell in currentPiece.Cells())
         {
-            deadCellMap[cell.x + 5, cell.y + 10] = currentPiece.tetrominoData.tile;
+            deadCellMap[cell.x + 5][cell.y + 10] = currentPiece.tetrominoData.tile;
         }
     }
 
@@ -281,13 +285,13 @@ public class Board : MonoBehaviour
         tilemap.ClearAllTiles();
 
         // Dead Cells
-        for (int x = 0; x < deadCellMap.GetLength(1); x++)
+        for (int x = 0; x < deadCellMap[0].GetLength(0); x++)
         {
-            for (int y = 0; y < deadCellMap.GetLength(0); y++)
+            for (int y = 0; y < deadCellMap.Count; y++)
             {
-                if (deadCellMap[y, x] != null)
+                if (deadCellMap[y][x] != null)
                 {
-                    tilemap.SetTile(new Vector3Int(y - 5, x - 10, 0), deadCellMap[y, x]);
+                    tilemap.SetTile(new Vector3Int(y - 5, x - 10, 0), deadCellMap[y][x]);
                 }
             }
         }
@@ -310,7 +314,7 @@ public class Board : MonoBehaviour
         {
             return true;
         }
-        if (deadCellMap[position.x + 5, position.y + 10] != null)
+        if (deadCellMap[position.x + 5][position.y + 10] != null)
         {
             return true;
         }

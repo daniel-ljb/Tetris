@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
@@ -12,7 +14,9 @@ public class Board : MonoBehaviour
     public int nextView = 5;
 
     private Piece currentPiece;
-    private Piece[] nextPieces;
+    private List<Piece> nextPieces = new();
+    private Piece heldPiece;
+    private bool canHold = true;
     private List<Tile[]> deadCellMap;
     private float nextSoftDrop;
     private float leftHeldStart;
@@ -36,25 +40,39 @@ public class Board : MonoBehaviour
 
     public void Update()
     {
-        Debug.Log(lastTimeMovedDown);
         HandleInputs();
         HandleGravity();
         HandleLockDelay();
         GUI();
+        List<int> fullLines = GetFullLines();
+        ClearLines(fullLines);
     }
 
     private void SpawnPiece()
     {
+        canHold = true;
         if (currentPiece != null)
         {
             SetPiece();
         }
-     //   while (nextPieces.Length < nextView + 1)
-       // {
-            
-       // }
-        int randomPieceIndex = Random.Range(0, pieceList.tetrominoes.Length);
-        currentPiece = new Piece(pieceList.tetrominoes[randomPieceIndex]);
+        while (nextPieces.Count < nextView + 1)
+        {
+            List<Piece> piecesToRandomise = new();
+            for (int i = 0; i < pieceList.tetrominoes.Length; i++)
+            {
+                piecesToRandomise.Add(new Piece(pieceList.tetrominoes[i]));
+            }
+
+            while (piecesToRandomise.Count > 0)
+            {
+                int randomPieceIndex = Random.Range(0, piecesToRandomise.Count);
+                nextPieces.Add(piecesToRandomise[randomPieceIndex]);
+                piecesToRandomise.RemoveAt(randomPieceIndex);
+            }
+        }
+
+        currentPiece = nextPieces[0];
+        nextPieces.RemoveAt(0);
         gravityTimer = Time.time + 0.95f;
     }
 
@@ -62,12 +80,31 @@ public class Board : MonoBehaviour
     {
         foreach (Vector2Int cell in currentPiece.Cells())
         {
-            deadCellMap[cell.x + 5][cell.y + 10] = currentPiece.tetrominoData.tile;
+            deadCellMap[cell.y + 10][cell.x + 5] = currentPiece.tetrominoData.tile;
         }
     }
 
     private void HandleInputs()
     {
+        // Holding
+        if (Input.GetKeyDown("c") && canHold)
+        {
+            if (heldPiece == null)
+            {
+                heldPiece = currentPiece;
+                currentPiece = null;
+                SpawnPiece();
+            }
+            else
+            {
+                Piece temp = currentPiece;
+                currentPiece = heldPiece;
+                currentPiece.ResetPosition();
+                heldPiece = temp;
+            }
+            canHold = false;
+        }
+
         // Horizontal Movement
         Vector2Int horizontalMovement = GetHorizontalInput();
         currentPiece.MovePiece(horizontalMovement);
@@ -291,7 +328,7 @@ public class Board : MonoBehaviour
             {
                 if (deadCellMap[y][x] != null)
                 {
-                    tilemap.SetTile(new Vector3Int(y - 5, x - 10, 0), deadCellMap[y][x]);
+                    tilemap.SetTile(new Vector3Int(x - 5, y - 10, 0), deadCellMap[y][x]);
                 }
             }
         }
@@ -301,6 +338,25 @@ public class Board : MonoBehaviour
         {
             Vector3Int position = (Vector3Int)cell;
             tilemap.SetTile(position, currentPiece.tetrominoData.tile);
+        }
+
+        // Held Piece
+        if (heldPiece != null)
+        {
+            foreach (var cell in heldPiece.Cells())
+            {
+                Vector3Int position = (Vector3Int)(cell - heldPiece.position + new Vector2Int(-8, 8));
+                tilemap.SetTile(position, heldPiece.tetrominoData.tile);
+            }
+        }
+        // Next Queue
+        for (int i = 0; i < nextView; i++)
+        {
+            foreach (var cell in nextPieces[i].Cells())
+            {
+                Vector3Int position = (Vector3Int)(cell - nextPieces[i].position + new Vector2Int(8, 8 - 4 * i));
+                tilemap.SetTile(position, nextPieces[i].tetrominoData.tile);
+            }
         }
     }
 
@@ -314,7 +370,7 @@ public class Board : MonoBehaviour
         {
             return true;
         }
-        if (deadCellMap[position.x + 5][position.y + 10] != null)
+        if (deadCellMap[position.y + 10][position.x + 5] != null)
         {
             return true;
         }
@@ -331,5 +387,38 @@ public class Board : MonoBehaviour
             }
         }
         return true;
+    }
+
+    private List<int> GetFullLines()
+    {
+        List<int> fullLines = new List<int>();
+        for (int i = 0; i < 20; i++)
+        {
+            bool rowFull = true;
+            foreach (var cell in deadCellMap[i])
+            {
+                if (cell == null)
+                {
+                    rowFull = false;
+                    break;
+                }
+            }
+
+            if (rowFull)
+            {
+                fullLines.Add(i);
+            }
+        }
+
+        return fullLines;
+    }
+
+    private void ClearLines(List<int> linesToClear)
+    {
+        for (int i = linesToClear.Count - 1; i >= 0; i--)
+        {
+            deadCellMap.RemoveAt(linesToClear[i]);
+            deadCellMap.Add(new Tile[10]);
+        }
     }
 }

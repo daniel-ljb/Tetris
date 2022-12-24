@@ -35,6 +35,11 @@ public class Piece
         rotation = _rotation;
     }
 
+    public void ResetPosition()
+    {
+        position = tetrominoData.spawnLocation;
+    }
+
     public void MovePiece(Vector2Int vector)
     {
         position += vector;

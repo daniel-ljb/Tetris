@@ -249,6 +249,8 @@ public class Board : MonoBehaviour
 
     private void RotatePiece(int rotationAmount)
     {
+        // rotation amount * 90 = degrees CW
+
         if (rotationAmount == 0)
         {
             return;
@@ -333,6 +335,14 @@ public class Board : MonoBehaviour
             }
         }
 
+        // Ghost
+        Vector2Int[] ghostCells = GetGhostCells();
+        foreach (var cell in ghostCells)
+        {
+            Vector3Int position = (Vector3Int)cell;
+            tilemap.SetTile(position, pieceList.ghostTile);
+        }
+
         // Current Piece
         foreach (var cell in currentPiece.Cells())
         {
@@ -354,7 +364,11 @@ public class Board : MonoBehaviour
         {
             foreach (var cell in nextPieces[i].Cells())
             {
-                Vector3Int position = (Vector3Int)(cell - nextPieces[i].position + new Vector2Int(8, 8 - 4 * i));
+                Vector3Int position = (Vector3Int)
+                    (cell                               // Starting position
+                    - nextPieces[i].position            // Centers
+                    + new Vector2Int(8, 8 - 4 * i));    // Moves to correct place
+
                 tilemap.SetTile(position, nextPieces[i].tetrominoData.tile);
             }
         }
@@ -420,5 +434,21 @@ public class Board : MonoBehaviour
             deadCellMap.RemoveAt(linesToClear[i]);
             deadCellMap.Add(new Tile[10]);
         }
+    }
+
+    private Vector2Int[] GetGhostCells()
+    {
+        int distance = 0;
+        while (CanMoveDown())
+        {
+            currentPiece.MovePiece(Vector2Int.down);
+            distance++;
+        }
+        Vector2Int[] ghostCells = currentPiece.Cells();
+        for (int i = 0; i < distance; i++)
+        {
+            currentPiece.MovePiece(Vector2Int.up);
+        }
+        return ghostCells;
     }
 }

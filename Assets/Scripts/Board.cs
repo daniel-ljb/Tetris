@@ -13,7 +13,7 @@ public class Board : MonoBehaviour
 
     private Piece currentPiece;
     private List<Piece> nextPieces = new();
-    private Piece heldPiece;
+    private Piece heldPiece = null;
     private bool canHold = true;
     private List<Tile[]> deadCellMap;
     private float nextSoftDrop;
@@ -193,31 +193,53 @@ public class Board : MonoBehaviour
         return rotationAmount % 4;
     }
 
-    private int GetWallKickTableIndex(int rotationBefore, int rotationAfter)
+// -------- Game ----------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+    private void SpawnPiece()
     {
-        int[][] wallKickTableIndexTable = new int[8][] {
-            new int[2] { 0, 1 },
-            new int[2] { 1, 0 },
-            new int[2] { 1, 2 },
-            new int[2] { 2, 1 },
-            new int[2] { 2, 3 },
-            new int[2] { 3, 2 },
-            new int[2] { 3, 0 },
-            new int[2] { 0, 3 }
-        };
-
-        int[] rotation = new int[2] { rotationBefore, rotationAfter };
-        
-        for (int i = 0; i < 8; i++)
+        // Handle Next Queue
+        if (currentPiece != null)
         {
-            if (rotation.SequenceEqual(wallKickTableIndexTable[i]))
+            SetPiece();
+        }
+        while (nextPieces.Count < nextView + 1)
+        {
+            List<Piece> piecesToRandomise = new();
+            for (int i = 0; i < pieceList.tetrominoes.Length; i++)
             {
-                return i;
+                piecesToRandomise.Add(new Piece(pieceList.tetrominoes[i]));
+            }
+
+            while (piecesToRandomise.Count > 0)
+            {
+                int randomPieceIndex = Random.Range(0, piecesToRandomise.Count);
+                nextPieces.Add(piecesToRandomise[randomPieceIndex]);
+                piecesToRandomise.RemoveAt(randomPieceIndex);
             }
         }
-        return 0; // unreachable!
+
+        // Spawn Piece
+        canHold = true;
+        currentPiece = nextPieces[0];
+        nextPieces.RemoveAt(0);
+        gravityTimer = Time.time + 0.95f;
+
+        // Gameover if invalid
+        if (!CurrentPieceValid())
+        {
+            gameRunning = false;
+        }
     }
 
+    private void SetPiece()
+    {
+        foreach (Vector2Int cell in currentPiece.Cells())
+        {
+            deadCellMap[cell.y + 10][cell.x + 5] = currentPiece.tetrominoData.tile;
+        }
+    }
+
+    // ---- Rotation ------------------------------------------------------------------------------
     private void RotatePiece(int rotationAmount)
     {
         // rotation amount * 90 = degrees CW
@@ -258,6 +280,44 @@ public class Board : MonoBehaviour
         }
     }
 
+    private int GetWallKickTableIndex(int rotationBefore, int rotationAfter)
+    {
+        int[][] wallKickTableIndexTable = new int[8][] {
+            new int[2] { 0, 1 },
+            new int[2] { 1, 0 },
+            new int[2] { 1, 2 },
+            new int[2] { 2, 1 },
+            new int[2] { 2, 3 },
+            new int[2] { 3, 2 },
+            new int[2] { 3, 0 },
+            new int[2] { 0, 3 }
+        };
+
+        int[] rotation = new int[2] { rotationBefore, rotationAfter };
+
+        for (int i = 0; i < 8; i++)
+        {
+            if (rotation.SequenceEqual(wallKickTableIndexTable[i]))
+            {
+                return i;
+            }
+        }
+        return 0; // unreachable!
+    }
+
+    // ---- Move down -----------------------------------------------------------------------------
+    private bool SoftDrop()
+    {
+        if (CanMoveDown())
+        {
+            currentPiece.MovePiece(Vector2Int.down);
+            gravityTimer += 3 / 60f;
+            lastTimeMovedDown = Time.time;
+            return true;
+        }
+        return false;
+    }
+
     private void HardDrop ()
     {
         while (true)
@@ -271,18 +331,6 @@ public class Board : MonoBehaviour
         }
     }
 
-    private bool SoftDrop()
-    {
-        if (CanMoveDown())
-        {
-            currentPiece.MovePiece(Vector2Int.down);
-            gravityTimer += 3 / 60f;
-            lastTimeMovedDown = Time.time;
-            return true;
-        }
-        return false;
-    }
-
     private bool CanMoveDown()
     {
         currentPiece.MovePiece(Vector2Int.down);
@@ -291,6 +339,72 @@ public class Board : MonoBehaviour
         return canSoftDrop;
     }
 
+    // ---- Clear Lines --------------------------------------------------------------------------
+    private List<int> GetFullLines()
+    {
+        List<int> fullLines = new List<int>();
+        for (int i = 0; i < 20; i++)
+        {
+            bool rowFull = true;
+            foreach (var cell in deadCellMap[i])
+            {
+                if (cell == null)
+                {
+                    rowFull = false;
+                    break;
+                }
+            }
+
+            if (rowFull)
+            {
+                fullLines.Add(i);
+            }
+        }
+
+        return fullLines;
+    }
+
+    private void ClearLines(List<int> linesToClear)
+    {
+        for (int i = linesToClear.Count - 1; i >= 0; i--)
+        {
+            deadCellMap.RemoveAt(linesToClear[i]);
+            deadCellMap.Add(new Tile[10]);
+        }
+    }
+
+    // ---- Valid --------------------------------------------------------------------------------
+    private bool InvalidCell(Vector2Int position)
+    {
+        if (position.x < -5 || position.x > 4)
+        {
+            return true;
+        }
+        if (position.y < -10) // || position.y > 9)
+        {
+            return true;
+        }
+        if (deadCellMap[position.y + 10][position.x + 5] != null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool CurrentPieceValid()
+    {
+        foreach (Vector2Int cell in currentPiece.Cells())
+        {
+            if (InvalidCell(cell))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    // ---- GUI ----------------------------------------------------------------------------------
     private void GUI()
     {
         // Clear Grid
@@ -344,68 +458,6 @@ public class Board : MonoBehaviour
 
                 tilemap.SetTile(position, nextPieces[i].tetrominoData.tile);
             }
-        }
-    }
-
-    private bool InvalidCell(Vector2Int position)
-    {
-        if (position.x < -5 || position.x > 4)
-        {
-            return true;
-        }
-        if (position.y < -10) // || position.y > 9)
-        {
-            return true;
-        }
-        if (deadCellMap[position.y + 10][position.x + 5] != null)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private bool CurrentPieceValid()
-    {
-        foreach (Vector2Int cell in currentPiece.Cells())
-        {
-            if (InvalidCell(cell))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private List<int> GetFullLines()
-    {
-        List<int> fullLines = new List<int>();
-        for (int i = 0; i < 20; i++)
-        {
-            bool rowFull = true;
-            foreach (var cell in deadCellMap[i])
-            {
-                if (cell == null)
-                {
-                    rowFull = false;
-                    break;
-                }
-            }
-
-            if (rowFull)
-            {
-                fullLines.Add(i);
-            }
-        }
-
-        return fullLines;
-    }
-
-    private void ClearLines(List<int> linesToClear)
-    {
-        for (int i = linesToClear.Count - 1; i >= 0; i--)
-        {
-            deadCellMap.RemoveAt(linesToClear[i]);
-            deadCellMap.Add(new Tile[10]);
         }
     }
 

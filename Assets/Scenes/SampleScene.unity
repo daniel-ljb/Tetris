@@ -655,7 +655,7 @@ MonoBehaviour:
     - {x: 0, y: 0}
     - {x: 1, y: 0}
     rotationCentre: {x: -0.5, y: -0.5}
-    spawnLocation: {x: 0, y: 9}
+    spawnLocation: {x: 0, y: 10}
   - tetrominoName: 1
     tile: {fileID: 11400000, guid: 95ee60b94e83c8e4b86728a89eb38a46, type: 2}
     cells:
@@ -664,7 +664,7 @@ MonoBehaviour:
     - {x: -1, y: 1}
     - {x: -2, y: 0}
     rotationCentre: {x: -1, y: 0}
-    spawnLocation: {x: 0, y: 8}
+    spawnLocation: {x: 0, y: 10}
   - tetrominoName: 2
     tile: {fileID: 11400000, guid: e5b7c5ebf72801a4abcfdb7fd6b36b2a, type: 2}
     cells:
@@ -673,7 +673,7 @@ MonoBehaviour:
     - {x: -1, y: -1}
     - {x: 0, y: -1}
     rotationCentre: {x: -0.5, y: -0.5}
-    spawnLocation: {x: 0, y: 9}
+    spawnLocation: {x: 0, y: 11}
   - tetrominoName: 3
     tile: {fileID: 11400000, guid: d93a3bdf1cd06a341a1c8e5cebacdd48, type: 2}
     cells:
@@ -682,7 +682,7 @@ MonoBehaviour:
     - {x: -2, y: 0}
     - {x: -2, y: 1}
     rotationCentre: {x: -1, y: 0}
-    spawnLocation: {x: 0, y: 8}
+    spawnLocation: {x: 0, y: 10}
   - tetrominoName: 4
     tile: {fileID: 11400000, guid: 59909b34984f1224ebd8ed4592bef790, type: 2}
     cells:
@@ -691,7 +691,7 @@ MonoBehaviour:
     - {x: -1, y: 0}
     - {x: -2, y: 0}
     rotationCentre: {x: -1, y: 0}
-    spawnLocation: {x: 0, y: 8}
+    spawnLocation: {x: 0, y: 10}
   - tetrominoName: 5
     tile: {fileID: 11400000, guid: 484b65a229ecb4d41b086a968b8e07b1, type: 2}
     cells:
@@ -700,7 +700,7 @@ MonoBehaviour:
     - {x: -1, y: 0}
     - {x: -2, y: 0}
     rotationCentre: {x: -1, y: 0}
-    spawnLocation: {x: 0, y: 8}
+    spawnLocation: {x: 0, y: 10}
   - tetrominoName: 6
     tile: {fileID: 11400000, guid: f87e41923c72500429c05b16d779db3c, type: 2}
     cells:
@@ -709,7 +709,7 @@ MonoBehaviour:
     - {x: -1, y: 1}
     - {x: -2, y: 1}
     rotationCentre: {x: -1, y: 0}
-    spawnLocation: {x: 0, y: 8}
+    spawnLocation: {x: 0, y: 10}
   ghostTile: {fileID: 11400000, guid: bc4c4c4e0db26a542b8b1bf0ca5c666f, type: 2}
 --- !u!1 &1198927008
 GameObject:

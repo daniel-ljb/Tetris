@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class Board : MonoBehaviour
@@ -24,12 +22,14 @@ public class Board : MonoBehaviour
     private float nextHorizontalMove;
     private float gravityTimer;
     private float lastTimeMovedDown;
+    private bool gameRunning;
 
     public void Start()
     {
+        gameRunning = true;
         pieceList = this.gameObject.GetComponentInChildren<PieceList>();
         deadCellMap = new List<Tile[]>();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 22; i++) // 2 Cells above top to allow pieces there
         {
             deadCellMap.Add(new Tile[10]);
         }
@@ -40,17 +40,24 @@ public class Board : MonoBehaviour
 
     public void Update()
     {
-        HandleInputs();
-        HandleGravity();
-        HandleLockDelay();
-        GUI();
-        List<int> fullLines = GetFullLines();
-        ClearLines(fullLines);
+        if (gameRunning)
+        {
+            HandlePlayerInputs();
+            HandleGravity();
+            HandleLockDelay();
+            if (!gameRunning)
+            {
+                return;
+            }
+            GUI();
+            List<int> fullLines = GetFullLines();
+            ClearLines(fullLines);
+        }
     }
 
     private void SpawnPiece()
     {
-        canHold = true;
+        // Handle Next Queue
         if (currentPiece != null)
         {
             SetPiece();
@@ -71,9 +78,17 @@ public class Board : MonoBehaviour
             }
         }
 
+        // Spawn Piece
+        canHold = true;
         currentPiece = nextPieces[0];
         nextPieces.RemoveAt(0);
         gravityTimer = Time.time + 0.95f;
+
+        // Gameover if invalid
+        if (!CurrentPieceValid())
+        {
+            gameRunning = false;
+        }
     }
 
     private void SetPiece()
@@ -84,7 +99,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void HandleInputs()
+    private void HandlePlayerInputs()
     {
         // Holding
         if (Input.GetKeyDown("c") && canHold)
@@ -222,29 +237,29 @@ public class Board : MonoBehaviour
         return rotationAmount % 4;
     }
 
-    private int GetWallKickTableIndex(int rotationAmount)
+    private int GetWallKickTableIndex(int rotationBefore, int rotationAfter)
     {
-        int wallKickTableIndex;
-        int rotationAfter = (rotationAmount + currentPiece.rotation) % 4;
+        int[][] wallKickTableIndexTable = new int[8][] {
+            new int[2] { 0, 1 },
+            new int[2] { 1, 0 },
+            new int[2] { 1, 2 },
+            new int[2] { 2, 1 },
+            new int[2] { 2, 3 },
+            new int[2] { 3, 2 },
+            new int[2] { 3, 0 },
+            new int[2] { 0, 3 }
+        };
 
-        if (currentPiece.rotation == 0 && rotationAfter == 3)
+        int[] rotation = new int[2] { rotationBefore, rotationAfter };
+        
+        for (int i = 0; i < 8; i++)
         {
-            wallKickTableIndex = 7;
-        }
-        else if (currentPiece.rotation == 3 && rotationAfter == 0)
-        {
-            wallKickTableIndex = 6;
-        }
-        else
-        {
-            wallKickTableIndex = currentPiece.rotation * 2;
-            if (rotationAfter < currentPiece.rotation)
+            if (rotation.SequenceEqual(wallKickTableIndexTable[i]))
             {
-                wallKickTableIndex -= 1;
+                return i;
             }
         }
-
-        return wallKickTableIndex;
+        return 0; // unreachable!
     }
 
     private void RotatePiece(int rotationAmount)
@@ -256,13 +271,15 @@ public class Board : MonoBehaviour
             return;
         }
 
+        // Wall Kicks
+        int wallKickTableIndex = GetWallKickTableIndex(
+            currentPiece.rotation,
+            (currentPiece.rotation + rotationAmount) % 4);
         // Rotate
         currentPiece.RotatePiece(rotationAmount);
 
-        // Wall Kicks
-        int wallKickTableIndex = GetWallKickTableIndex(rotationAmount);
+        
         bool canRotate = false;
-
         // For each wall kick position
         for (int i = 0; i < currentPiece.tetrominoData.wallKicks.GetLength(1); i++)
         {
@@ -380,7 +397,7 @@ public class Board : MonoBehaviour
         {
             return true;
         }
-        if (position.y < -10 || position.y > 9)
+        if (position.y < -10) // || position.y > 9)
         {
             return true;
         }

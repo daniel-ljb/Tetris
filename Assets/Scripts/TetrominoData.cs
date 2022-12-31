@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

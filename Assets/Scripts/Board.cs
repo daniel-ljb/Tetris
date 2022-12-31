@@ -55,50 +55,6 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void SpawnPiece()
-    {
-        // Handle Next Queue
-        if (currentPiece != null)
-        {
-            SetPiece();
-        }
-        while (nextPieces.Count < nextView + 1)
-        {
-            List<Piece> piecesToRandomise = new();
-            for (int i = 0; i < pieceList.tetrominoes.Length; i++)
-            {
-                piecesToRandomise.Add(new Piece(pieceList.tetrominoes[i]));
-            }
-
-            while (piecesToRandomise.Count > 0)
-            {
-                int randomPieceIndex = Random.Range(0, piecesToRandomise.Count);
-                nextPieces.Add(piecesToRandomise[randomPieceIndex]);
-                piecesToRandomise.RemoveAt(randomPieceIndex);
-            }
-        }
-
-        // Spawn Piece
-        canHold = true;
-        currentPiece = nextPieces[0];
-        nextPieces.RemoveAt(0);
-        gravityTimer = Time.time + 0.95f;
-
-        // Gameover if invalid
-        if (!CurrentPieceValid())
-        {
-            gameRunning = false;
-        }
-    }
-
-    private void SetPiece()
-    {
-        foreach (Vector2Int cell in currentPiece.Cells())
-        {
-            deadCellMap[cell.y + 10][cell.x + 5] = currentPiece.tetrominoData.tile;
-        }
-    }
-
     private void HandlePlayerInputs()
     {
         // Holding

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
@@ -10,198 +11,35 @@ public class Board : MonoBehaviour
     public Tilemap tilemap;
     public int lockDelay = 30;
     public int nextView = 5;
+    public TMP_Text scoreText;
 
-    private Piece currentPiece;
-    private List<Piece> nextPieces = new();
-    private Piece heldPiece = null;
-    private bool canHold = true;
-    private List<Tile[]> deadCellMap;
-    private float nextSoftDrop;
-    private float leftHeldStart;
-    private float rightHeldStart;
-    private float nextHorizontalMove;
-    private float gravityTimer;
-    private float lastTimeMovedDown;
-    private bool gameRunning;
+    [HideInInspector] public float score;
+    [HideInInspector] public int combo = -1;
+    public Piece currentPiece;
+    protected List<Piece> nextPieces = new();
+    protected Piece heldPiece = null;
+    protected bool canHold = true;
+    protected List<Tile[]> deadCellMap;
+    protected float nextSoftDrop;
+    protected float leftHeldStart;
+    protected float rightHeldStart;
+    protected float nextHorizontalMove;
+    protected float gravityTimer;
+    protected float lastTimeMovedDown;
+    public bool gameRunning;
+  
 
-    public void Start()
-    {
-        gameRunning = true;
-        pieceList = this.gameObject.GetComponentInChildren<PieceList>();
-        deadCellMap = new List<Tile[]>();
-        for (int i = 0; i < 22; i++) // 2 Cells above top to allow pieces there
-        {
-            deadCellMap.Add(new Tile[10]);
-        }
-
-        SpawnPiece();
-        gravityTimer = Time.time + 0.95f;
-    }
-
-    public void Update()
-    {
-        if (gameRunning)
-        {
-            HandlePlayerInputs();
-            HandleGravity();
-            HandleLockDelay();
-            if (!gameRunning)
-            {
-                return;
-            }
-            GUI();
-            List<int> fullLines = GetFullLines();
-            ClearLines(fullLines);
-        }
-    }
-
-    private void HandlePlayerInputs()
-    {
-        // Holding
-        if (Input.GetKeyDown("c") && canHold)
-        {
-            if (heldPiece == null)
-            {
-                heldPiece = currentPiece;
-                currentPiece = null;
-                SpawnPiece();
-            }
-            else
-            {
-                Piece temp = currentPiece;
-                currentPiece = heldPiece;
-                currentPiece.ResetPosition();
-                heldPiece = temp;
-            }
-            canHold = false;
-        }
-
-        // Horizontal Movement
-        Vector2Int horizontalMovement = GetHorizontalInput();
-        currentPiece.MovePiece(horizontalMovement);
-        if (!CurrentPieceValid())
-        {
-            currentPiece.MovePiece(-horizontalMovement);
-        }
-
-        // Rotate Piece
-        int rotationAmount = GetRotationInput();
-        RotatePiece(rotationAmount);
-
-        // Vertical Movement
-        if (Input.GetKeyDown("space"))
-        {
-            HardDrop();
-        }
-        else if (Input.GetKeyDown("down"))
-        {
-            SoftDrop();
-            nextSoftDrop = Time.time + 3 / 60f;
-        }
-        else if (Input.GetKey("down"))
-        {
-            if (Time.time > nextSoftDrop)
-            {
-                SoftDrop();
-                nextSoftDrop += 3 / 60f;
-            }
-        }
-    }
-
-    private void HandleGravity()
-    {
-        if (Time.time > gravityTimer)
-        {
-            bool movedDown = SoftDrop();
-            if (movedDown)
-            {
-                gravityTimer += 0.95f;
-            }
-        }
-    }
-
-    private void HandleLockDelay()
-    {
-        if (Time.time - lastTimeMovedDown >= lockDelay / 60f
-            && !CanMoveDown())
-        {
-            SpawnPiece();
-        }
-    }
-
-    private Vector2Int GetHorizontalInput()
-    {
-        // 5 frames first held, 1 frame after. 30fps
-        if (Input.GetKeyDown("left"))
-        {
-            leftHeldStart = Time.time;
-            nextHorizontalMove = Time.time + 5 / 30f;
-            return Vector2Int.left;
-        }
-        else if (Input.GetKeyDown("right"))
-        {
-            rightHeldStart = Time.time;
-            nextHorizontalMove = Time.time + 5 / 30f;
-            return Vector2Int.right;
-        }
-        
-        else if (Time.time < nextHorizontalMove)
-        {
-            return Vector2Int.zero;
-        }
-
-        else if (Input.GetKey("left") && Input.GetKey("right"))
-        {
-            nextHorizontalMove += 1 / 30f;
-            if (leftHeldStart > rightHeldStart)
-            {
-                return Vector2Int.left;
-            }
-            else
-            {
-                return Vector2Int.right;
-            }
-        }
-        else if (Input.GetKey("left"))
-        {
-            nextHorizontalMove += 1 / 30f;
-            return Vector2Int.left;
-        }
-        else if (Input.GetKey("right"))
-        {
-            nextHorizontalMove += 1 / 30f;
-            return Vector2Int.right;
-        }
-        else
-        {
-            return Vector2Int.zero;
-        }
-    }
-
-    private int GetRotationInput()
-    {
-        int rotationAmount = 0;
-        if (Input.GetKeyDown("z"))
-        {
-            rotationAmount += 3;
-        }
-        if (Input.GetKeyDown("x"))
-        {
-            rotationAmount += 1;
-        }
-
-        return rotationAmount % 4;
-    }
-
-// -------- Game ----------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------
-    private void SpawnPiece()
+    // -------- Game ----------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------
+    protected void SpawnPiece()
     {
         // Handle Next Queue
         if (currentPiece != null)
         {
             SetPiece();
         }
+        //Debug.Log(nextPieces);
+        //Debug.Log(nextView);
         while (nextPieces.Count < nextView + 1)
         {
             List<Piece> piecesToRandomise = new();
@@ -231,7 +69,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void SetPiece()
+    protected void SetPiece()
     {
         foreach (Vector2Int cell in currentPiece.Cells())
         {
@@ -240,7 +78,7 @@ public class Board : MonoBehaviour
     }
 
     // ---- Rotation ------------------------------------------------------------------------------
-    private void RotatePiece(int rotationAmount)
+    protected void RotatePiece(int rotationAmount)
     {
         // rotation amount * 90 = degrees CW
 
@@ -276,11 +114,18 @@ public class Board : MonoBehaviour
         if (!canRotate)
         {
             // If can't rotate, cancel rotation
-            currentPiece.RotatePiece(-rotationAmount);
+            if (rotationAmount == 1)
+            {
+                currentPiece.RotatePiece(3);
+            }
+            else
+            {
+                currentPiece.RotatePiece(1);
+            }
         }
     }
 
-    private int GetWallKickTableIndex(int rotationBefore, int rotationAfter)
+    protected int GetWallKickTableIndex(int rotationBefore, int rotationAfter)
     {
         int[][] wallKickTableIndexTable = new int[8][] {
             new int[2] { 0, 1 },
@@ -306,23 +151,25 @@ public class Board : MonoBehaviour
     }
 
     // ---- Move down -----------------------------------------------------------------------------
-    private bool SoftDrop()
+    protected bool SoftDrop()
     {
         if (CanMoveDown())
         {
             currentPiece.MovePiece(Vector2Int.down);
             gravityTimer += 3 / 60f;
             lastTimeMovedDown = Time.time;
+            score++;
             return true;
         }
         return false;
     }
 
-    private void HardDrop ()
+    protected void HardDrop ()
     {
         while (true)
         {
             bool movedDown = SoftDrop();
+            score++; // 2 score for hard drop so add 1 more
             if (!movedDown)
             {
                 SpawnPiece();
@@ -331,7 +178,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private bool CanMoveDown()
+    protected bool CanMoveDown()
     {
         currentPiece.MovePiece(Vector2Int.down);
         bool canSoftDrop = CurrentPieceValid();
@@ -339,8 +186,32 @@ public class Board : MonoBehaviour
         return canSoftDrop;
     }
 
+    // ---- Hold ---------------------------------------------------------------------------------
+    protected bool Hold()
+    {
+        if (canHold)
+        {
+            if (heldPiece == null)
+            {
+                heldPiece = currentPiece;
+                currentPiece = null;
+                SpawnPiece();
+            }
+            else
+            {
+                Piece temp = currentPiece;
+                currentPiece = heldPiece;
+                currentPiece.ResetPosition();
+                heldPiece = temp;
+            }
+            canHold = false;
+            return true;
+        }
+        return false;
+    }
+
     // ---- Clear Lines --------------------------------------------------------------------------
-    private List<int> GetFullLines()
+    protected List<int> GetFullLines()
     {
         List<int> fullLines = new List<int>();
         for (int i = 0; i < 20; i++)
@@ -364,23 +235,49 @@ public class Board : MonoBehaviour
         return fullLines;
     }
 
-    private void ClearLines(List<int> linesToClear)
+    protected void ClearLines(List<int> linesToClear)
     {
         for (int i = linesToClear.Count - 1; i >= 0; i--)
         {
             deadCellMap.RemoveAt(linesToClear[i]);
             deadCellMap.Add(new Tile[10]);
         }
+
+        combo += 1;
+        switch (linesToClear.Count)
+        {
+            case 0:
+                combo = -1;
+                break;
+            case 1:
+                score += 100;
+                break;
+            case 2:
+                score += 300;
+                break;
+            case 3:
+                score += 500;
+                break;
+            default:
+                score += 800;
+                break;
+        }
+
+        if (combo >= 1)
+        {
+            score += 50 * combo;
+        }
     }
 
     // ---- Valid --------------------------------------------------------------------------------
-    private bool InvalidCell(Vector2Int position)
+    protected bool InvalidCell(Vector2Int position)
     {
+        //Debug.Log(position);
         if (position.x < -5 || position.x > 4)
         {
             return true;
         }
-        if (position.y < -10) // || position.y > 9)
+        if (position.y < -10 || position.y > 12)
         {
             return true;
         }
@@ -391,10 +288,11 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    private bool CurrentPieceValid()
+    public bool CurrentPieceValid()
     {
         foreach (Vector2Int cell in currentPiece.Cells())
         {
+            //Debug.Log(cell);
             if (InvalidCell(cell))
             {
                 return false;
@@ -405,7 +303,7 @@ public class Board : MonoBehaviour
 
 
     // ---- GUI ----------------------------------------------------------------------------------
-    private void GUI()
+    protected void GUI()
     {
         // Clear Grid
         tilemap.ClearAllTiles();
@@ -459,9 +357,15 @@ public class Board : MonoBehaviour
                 tilemap.SetTile(position, nextPieces[i].tetrominoData.tile);
             }
         }
+
+        if (scoreText == null)
+        {
+            scoreText = gameObject.GetComponentInChildren<TMP_Text>();
+        }
+        scoreText.SetText(score.ToString());
     }
 
-    private Vector2Int[] GetGhostCells()
+    protected Vector2Int[] GetGhostCells()
     {
         int distance = 0;
         while (CanMoveDown())

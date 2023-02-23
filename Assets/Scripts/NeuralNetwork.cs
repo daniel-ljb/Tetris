@@ -23,11 +23,14 @@ public class NeuralNetwork
     public void SaveToFile(string fileName)
     {
         string destination = Application.persistentDataPath + "/" + fileName + ".txt";
-
         StreamWriter file = File.CreateText(destination);
-
-        file.WriteLine(ToString());
+        SaveToFile(file);
         file.Close();
+    }
+
+    public void SaveToFile(StreamWriter file)
+    {
+        file.WriteLine(ToString());
     }
 
     public static NeuralNetwork LoadFromFile(string fileName)

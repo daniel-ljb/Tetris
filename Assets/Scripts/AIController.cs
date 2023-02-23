@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
@@ -15,7 +16,12 @@ public class AIController : Board
         this.neuralNetwork = neuralNetwork;
     }
 
-    public void Start()
+    public void SetNeuralNetwork(NeuralNetwork neuralNetwork)
+    {
+        this.neuralNetwork = neuralNetwork;
+    }
+
+    public void _Start()
     {
         nextPieces = new();
         gameRunning = true;
@@ -119,44 +125,20 @@ public class AIController : Board
     }
 
     // left right z x down space c
-    int GetAIInputs()
+    private int GetAIInputs()
     {
-        int input = (new int[] { 1, 2, 3, 4, 5, 6, 7 })[Random.Range(0, 7)];
-        return input;
+        //int input = (new int[] { 1, 2, 3, 4, 5, 6, 7 })[Random.Range(0, 7)];
+        //return input;
 
         //bool[] inputs = new bool[7];
         //inputs[Random.Range(1, 7)] = true;
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            return 1;
-        }
-        else if (Input.GetKey(KeyCode.RightArrow)) {
-            return 2;
-        }
-        else if (Input.GetKey(KeyCode.Z))
-        {
-            return 3;
-        }
-        else if (Input.GetKey(KeyCode.X))
-        {
-            return 4;
-        }
-        else if (Input.GetKey(KeyCode.DownArrow))
-        {
-            return 5;
-        }
-        else if (Input.GetKey(KeyCode.Space))
-        {
-            return 6;
-        }
-        else if (Input.GetKey(KeyCode.C))
-        {
-            return 7;
-        }
-        return -1;
+
+        float[] neuralNetworkInput = GetNeuralNetworkInput();
+        float[] neuralNetworkOutput = neuralNetwork.CalculateValues(neuralNetworkInput);
+        return 1 + Array.IndexOf(neuralNetworkOutput, neuralNetworkOutput.Max());
     }
 
-    float[] GetNeuralInput()
+    private float[] GetNeuralNetworkInput()
     {
         float[] neuralInput = new float[286];
         //   0 - 229, 23*10 dead cell map
@@ -169,16 +151,23 @@ public class AIController : Board
         // 285 CanHold
 
         // deadCellMap
+        int deadCellMapWidth = deadCellMap[0].Length;
         for (int i = 0; i < 230; i ++)
         {
-            if (deadCellMap[i] != null)
+            int row = i / deadCellMapWidth;
+            int column = i % deadCellMapWidth;
+
+            if (deadCellMap[row][column] != null)
             {
                 neuralInput[i] = 1f;
             }
         }
 
         // Held
-        neuralInput[230 + PieceToNumber(heldPiece.tetrominoData.tetrominoName)] = 1f;
+        if (heldPiece != null)
+        {
+            neuralInput[230 + PieceToNumber(heldPiece.tetrominoData.tetrominoName)] = 1f;
+        }
 
         // Current
         neuralInput[237 + PieceToNumber(currentPiece.tetrominoData.tetrominoName)] = 1f;

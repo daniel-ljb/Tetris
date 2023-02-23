@@ -27,6 +27,7 @@ public class Board : MonoBehaviour
     protected float gravityTimer;
     protected float lastTimeMovedDown;
     public bool gameRunning;
+    [HideInInspector] public List<TetrominoName> PieceHistory = new();
   
 
     // -------- Game ----------------------------------------------------------------------------------
@@ -59,6 +60,7 @@ public class Board : MonoBehaviour
         // Spawn Piece
         canHold = true;
         currentPiece = nextPieces[0];
+        PieceHistory.Add(currentPiece.tetrominoData.tetrominoName);
         nextPieces.RemoveAt(0);
         gravityTimer = Time.time + 0.95f;
 

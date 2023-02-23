@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,18 +14,8 @@ public class Population : MonoBehaviour
     private int height;
     private float[] scores;
     
-    void Start()
+    public void _Start()
     {
-        NeuralNetwork n = new NeuralNetwork(new int[] { 12, 5, 7 });
-        NeuralNetwork m = new NeuralNetwork(new int[] { 12, 5, 7 });
-        NeuralNetwork o = NeuralNetwork.Crossover(n, m);
-        Debug.Log(n.ToString());
-        Debug.Log(m.ToString());
-        Debug.Log(o.ToString());
-        m.SaveToFile("hello");
-        NeuralNetwork p = NeuralNetwork.LoadFromFile("hello");
-        Debug.Log(p.ToString());
-
         pieceList = gameObject.GetComponentInChildren<PieceList>();
         running = true;
 
@@ -60,6 +49,26 @@ public class Population : MonoBehaviour
         camera.orthographicSize = height * 16;
     }
 
+    public void SetNeuralNetworks(NeuralNetwork[] neuralNetworks)
+    {
+        for (int i = 0; i < neuralNetworks.Length && i < AIBoards.Length; i++)
+        {
+            AIBoards[i].SetNeuralNetwork(neuralNetworks[i]);
+        }
+    }
+
+    public void RunPopulation()
+    {
+        for (int i = 0; i < AIBoards.Length; i++)
+        {
+            AIBoards[i]._Start();
+        }
+        while (running)
+        {
+            _Update();
+        }
+    }
+
     private void _Update()
     {
         running = false;
@@ -68,7 +77,7 @@ public class Population : MonoBehaviour
             AIBoards[i]._Update();
             if (!AIBoards[i].gameRunning)
             {
-                AIBoards[i].gameObject.SetActive(false);
+                //AIBoards[i].gameObject.SetActive(false);
             }
             else
             {

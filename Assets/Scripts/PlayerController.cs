@@ -92,7 +92,7 @@ public class PlayerController : Board
             bool movedDown = SoftDrop();
             if (movedDown)
             {
-                score--;
+                //score--;
                 gravityTimer += 0.95f;
             }
         }

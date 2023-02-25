@@ -61,7 +61,7 @@ public class Layer
     {
         int row = Random.Range(0, nodes);
         int column = Random.Range(0, nodesOnPreviousLayer + 1);
-        weightTable[row, column] = Random.Range(0, 1f);
+        weightTable[row, column] += Random.Range(-.2f, .2f);
     }
 
     private void RandomiseWeights()

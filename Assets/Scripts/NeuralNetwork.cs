@@ -148,7 +148,7 @@ public class NeuralNetwork
                 numberOfWeights += (layerSizes[i] + 1) * layerSizes[i + 1];
             }
             
-            numberOfMutations = (int)Mathf.Ceil(numberOfWeights * 0.001f);
+            numberOfMutations = (int)Mathf.Ceil(numberOfWeights * 0.01f);
         }
 
         for (int i = 0; i < numberOfMutations; i++)

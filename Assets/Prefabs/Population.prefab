@@ -156,4 +156,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIBoardPrefab: {fileID: 7537446526948496288, guid: a321c37cd97a42043b5d47e21c4be82d, type: 3}
   numberOfAis: 128
-  running: 1
+  running: 0

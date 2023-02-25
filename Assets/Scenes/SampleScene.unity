@@ -198,8 +198,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   populationPrefab: {fileID: 3551023848163592540, guid: 5199badfa9e217642aaf92a1d4f63d99, type: 3}
-  populationSize: 128
-  layerSizes: 1e010000c8000000c8000000c8000000c8000000c800000007000000
+  populationSize: 32
+  layerSizes: 1e0100006400000064000000640000006400000007000000
+  running: 0
 --- !u!4 &422216321
 Transform:
   m_ObjectHideFlags: 0
@@ -987,6 +988,7 @@ MonoBehaviour:
   combo: -1
   gameRunning: 0
   PieceHistory: 
+  previousX: -100
 --- !u!1 &1795929142
 GameObject:
   m_ObjectHideFlags: 0

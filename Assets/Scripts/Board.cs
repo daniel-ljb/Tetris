@@ -28,6 +28,7 @@ public class Board : MonoBehaviour
     protected float lastTimeMovedDown;
     public bool gameRunning;
     [HideInInspector] public List<TetrominoName> PieceHistory = new();
+    public int previousX;
   
 
     // -------- Game ----------------------------------------------------------------------------------
@@ -37,6 +38,13 @@ public class Board : MonoBehaviour
         // Handle Next Queue
         if (currentPiece != null)
         {
+            int score = 1000 / (currentPiece.position.y + 11);
+            if (previousX != -100)
+            {
+                score *= Mathf.Abs(currentPiece.position.x - previousX);
+            }
+            this.score += score;
+            previousX = currentPiece.position.x;
             SetPiece();
         }
         //Debug.Log(nextPieces);
@@ -160,7 +168,7 @@ public class Board : MonoBehaviour
             currentPiece.MovePiece(Vector2Int.down);
             gravityTimer += 3 / 60f;
             lastTimeMovedDown = Time.time;
-            score++;
+            //score++;
             return true;
         }
         return false;
@@ -252,16 +260,16 @@ public class Board : MonoBehaviour
                 combo = -1;
                 break;
             case 1:
-                score += 100;
+                score += 1000000;
                 break;
             case 2:
-                score += 300;
+                score += 10000000;
                 break;
             case 3:
-                score += 500;
+                score += 100000000;
                 break;
             default:
-                score += 800;
+                score += 1000000000;
                 break;
         }
 

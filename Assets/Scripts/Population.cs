@@ -7,7 +7,8 @@ public class Population : MonoBehaviour
 {
     public GameObject AIBoardPrefab;
     public int numberOfAis = 16;
-    [HideInInspector] public bool running = true;
+    public bool running = false;
+    public bool finished = false;
     private AIController[] AIBoards;
     private PieceList pieceList;
     private int width;
@@ -17,9 +18,9 @@ public class Population : MonoBehaviour
     public void _Start()
     {
         pieceList = gameObject.GetComponentInChildren<PieceList>();
-        running = true;
 
         AIBoards = new AIController[numberOfAis];
+        scores = new float[numberOfAis];
 
         width = (int)Mathf.Ceil(Mathf.Sqrt(numberOfAis / 2f)) * 2;
         height = (int)Mathf.Ceil(numberOfAis / (float)width);
@@ -45,8 +46,25 @@ public class Population : MonoBehaviour
         }
 
         // Camera
-        Camera camera = Camera.main;
-        camera.orthographicSize = height * 16;
+        Camera.main.orthographicSize = height * 16;
+    }
+
+    public float[] GetScores()
+    {
+        for (int i = 0; i < numberOfAis; i++)
+        {
+            scores[i] = AIBoards[i].score;
+        }
+        return scores;
+    }
+
+    public NeuralNetwork GetBestNeuralNetwork()
+    {
+        AIController[] sortedAIControllers = AIBoards;
+        Array.Sort(sortedAIControllers,
+            delegate (AIController x, AIController y) { return y.score.CompareTo(x.score); });
+
+        return sortedAIControllers[0].neuralNetwork;
     }
 
     public void SetNeuralNetworks(NeuralNetwork[] neuralNetworks)
@@ -63,7 +81,14 @@ public class Population : MonoBehaviour
         {
             AIBoards[i]._Start();
         }
-        while (running)
+        running = true;
+    }
+
+    private void FixedUpdate()
+    {
+        //Debug.Log(running);
+        
+        if (running)
         {
             _Update();
         }
@@ -72,6 +97,7 @@ public class Population : MonoBehaviour
     private void _Update()
     {
         running = false;
+        //Debug.Log(AIBoards);
         for (int i = 0; i < AIBoards.Length; i++)
         {
             AIBoards[i]._Update();
@@ -84,24 +110,27 @@ public class Population : MonoBehaviour
                 running = true;
             }
         }
+        if (!running)
+        {
+            finished = true;
+        }
     }
 
-    private NeuralNetwork[] GenerateNextNeuralNetworks()
+    public NeuralNetwork[] GenerateNextNeuralNetworks()
     {
         AIController[] sortedAIControllers = AIBoards;
         Array.Sort(sortedAIControllers,
-            delegate (AIController x, AIController y) { return x.score.CompareTo(y.score); });
+            delegate (AIController x, AIController y) { return y.score.CompareTo(x.score); });
 
         List<NeuralNetwork> previousNeuralNetworks = new();
         
-        for (int i = 0; i < AIBoards.Length / 2; i ++)
+        for (int i = 0; i < AIBoards.Length / 2; i++)
         {
             previousNeuralNetworks.Add(sortedAIControllers[i].neuralNetwork);
         }
-
         NeuralNetwork[] newNeuralNetworks = new NeuralNetwork[previousNeuralNetworks.Count * 2];
 
-        for (int i = 0; i < newNeuralNetworks.Length; i += 2)
+        for (int i = 0; i < newNeuralNetworks.Length; i += 4)
         {
             int randomIndex1 = Random.Range(0, previousNeuralNetworks.Count);
             NeuralNetwork neuralNetwork1 = previousNeuralNetworks[randomIndex1];
@@ -111,7 +140,14 @@ public class Population : MonoBehaviour
             previousNeuralNetworks.RemoveAt(randomIndex2);
 
             newNeuralNetworks[i] = NeuralNetwork.Crossover(neuralNetwork1, neuralNetwork2);
-            newNeuralNetworks[i + 1] = NeuralNetwork.Crossover(neuralNetwork2, neuralNetwork1);
+            newNeuralNetworks[i + 1] = NeuralNetwork.Crossover(neuralNetwork1, neuralNetwork2);
+            newNeuralNetworks[i + 2] = NeuralNetwork.Crossover(neuralNetwork2, neuralNetwork1);
+            newNeuralNetworks[i + 3] = NeuralNetwork.Crossover(neuralNetwork2, neuralNetwork1);
+        }
+
+        for (int i = 0; i < newNeuralNetworks.Length; i++)
+        {
+            newNeuralNetworks[i].Mutate();
         }
 
         return newNeuralNetworks;

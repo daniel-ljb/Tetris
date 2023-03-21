@@ -28,7 +28,7 @@ public class Board : MonoBehaviour
     protected float lastTimeMovedDown;
     public bool gameRunning;
     [HideInInspector] public List<TetrominoName> PieceHistory = new();
-    public int previousX;
+    
   
 
     // -------- Game ----------------------------------------------------------------------------------
@@ -38,13 +38,13 @@ public class Board : MonoBehaviour
         // Handle Next Queue
         if (currentPiece != null)
         {
-            int score = 1000 / (currentPiece.position.y + 11);
+            /*int score = 1000 / (currentPiece.position.y + 11);
             if (previousX != -100)
             {
                 score *= Mathf.Abs(currentPiece.position.x - previousX);
             }
             this.score += score;
-            previousX = currentPiece.position.x;
+            previousX = currentPiece.position.x;*/
             SetPiece();
         }
         //Debug.Log(nextPieces);
@@ -174,16 +174,19 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    protected void HardDrop ()
+    protected int HardDrop ()
     {
+        int i = 0;
         while (true)
         {
             bool movedDown = SoftDrop();
-            score++; // 2 score for hard drop so add 1 more
+            i++;
+            //score++; // 2 score for hard drop so add 1 more
             if (!movedDown)
             {
+                i--;
                 SpawnPiece();
-                return;
+                return i;
             }
         }
     }
@@ -260,16 +263,16 @@ public class Board : MonoBehaviour
                 combo = -1;
                 break;
             case 1:
-                score += 1000000;
+                score += 100;
                 break;
             case 2:
-                score += 10000000;
+                score += 300;
                 break;
             case 3:
-                score += 100000000;
+                score += 600;
                 break;
             default:
-                score += 1000000000;
+                score += 1200;
                 break;
         }
 

@@ -25,7 +25,6 @@ public class AIController : Board
     {
         nextPieces = new();
         gameRunning = true;
-        previousX = -100;
         if (pieceList == null)
         {
             pieceList = gameObject.GetComponentInChildren<PieceList>();

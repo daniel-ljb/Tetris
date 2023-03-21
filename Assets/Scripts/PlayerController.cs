@@ -29,7 +29,6 @@ public class PlayerController : Board
 
     public void Update()
     {
-        Debug.Log(currentPiece.position.y);
         if (gameRunning)
         {
             HandlePlayerInputs();

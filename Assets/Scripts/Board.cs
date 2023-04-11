@@ -201,15 +201,16 @@ public class Board : MonoBehaviour
         {
             if (heldPiece == null)
             {
+                currentPiece.ResetPosition();
                 heldPiece = currentPiece;
                 currentPiece = null;
                 SpawnPiece();
             }
             else
             {
+                currentPiece.ResetPosition();
                 Piece temp = currentPiece;
                 currentPiece = heldPiece;
-                currentPiece.ResetPosition();
                 heldPiece = temp;
             }
             canHold = false;

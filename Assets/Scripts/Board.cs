@@ -105,7 +105,6 @@ public class Board : MonoBehaviour
         currentPiece.RotatePiece(rotationAmount);
 
         
-        bool canRotate = false;
         // For each wall kick position
         for (int i = 0; i < currentPiece.tetrominoData.wallKicks.GetLength(1); i++)
         {
@@ -114,24 +113,20 @@ public class Board : MonoBehaviour
 
             if (CurrentPieceValid())
             {
-                canRotate = true;
-                break;
+                return;
             }
             // If Invalid move back
             currentPiece.MovePiece(-wallKick);
         }
 
-        if (!canRotate)
+        // If can't rotate, cancel rotation
+        if (rotationAmount == 1)
         {
-            // If can't rotate, cancel rotation
-            if (rotationAmount == 1)
-            {
-                currentPiece.RotatePiece(3);
-            }
-            else
-            {
-                currentPiece.RotatePiece(1);
-            }
+            currentPiece.RotatePiece(3);
+        }
+        else
+        {
+            currentPiece.RotatePiece(1);
         }
     }
 
@@ -174,7 +169,7 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    protected int HardDrop ()
+    protected int HardDrop()
     {
         int i = 0;
         while (true)

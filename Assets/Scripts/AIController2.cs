@@ -36,6 +36,8 @@ public class AIController2 : Board
             deadCellMap.Add(new Tile[10]);
         }
 
+        //SetWeights(-5.922214f, -11.14342f, -6.940077f, -159.806f, -31.40231f, 16.82962f, -4.273068f, -1.282436f);
+        SetWeights(-5.96f, -10.89f, -6.45f, -162.41f, -32.3f, 18.22f, -4.44f, -1.24f);
         SpawnPiece();
     }
 

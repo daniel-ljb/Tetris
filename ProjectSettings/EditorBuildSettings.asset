@@ -8,16 +8,16 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Main Menu.unity
     guid: d6db769d650dd974d91501c264a667fb
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/AI Board.unity
     guid: e516a21f469df884aab984138b68e346
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Player Board.unity
     guid: deee19e0ab1610b4a9293c4fb1d188dd
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/AI Trainer.unity
     guid: 1002cb56500d45347883c0779fa42544
   m_configObjects: {}

@@ -40,17 +40,20 @@ public struct TetrominoData
             // 90 degrees CW
             rotationCells[1, i] = new Vector2Int(
                 (int)(cell.y + rotationCentre.x - rotationCentre.y),
-                (int)(-cell.x + rotationCentre.x + rotationCentre.y));
+                (int)(-cell.x + rotationCentre.x + rotationCentre.y)
+                );
 
             // 180 degrees
             rotationCells[2, i] = new Vector2Int(
                 (int)(-cell.x + 2 * rotationCentre.x),
-                (int)(-cell.y + 2 * rotationCentre.y));
+                (int)(-cell.y + 2 * rotationCentre.y)
+                );
 
             // 270 degrees CW
             rotationCells[3, i] = new Vector2Int(
                 (int)(-cell.y + rotationCentre.x + rotationCentre.y),
-                (int)(cell.x - rotationCentre.x + rotationCentre.y));
+                (int)(cell.x - rotationCentre.x + rotationCentre.y)
+                );
         }
     }
 

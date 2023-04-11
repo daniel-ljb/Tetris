@@ -384,10 +384,7 @@ public class Board : MonoBehaviour
             distance++;
         }
         Vector2Int[] ghostCells = currentPiece.Cells();
-        for (int i = 0; i < distance; i++)
-        {
-            currentPiece.MovePiece(Vector2Int.up);
-        }
+        currentPiece.MovePiece(new Vector2Int(0, distance));
         return ghostCells;
     }
 }

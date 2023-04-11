@@ -197,26 +197,27 @@ public class Board : MonoBehaviour
     // ---- Hold ---------------------------------------------------------------------------------
     protected bool Hold()
     {
-        if (canHold)
-        {
-            if (heldPiece == null)
-            {
-                currentPiece.ResetPosition();
-                heldPiece = currentPiece;
-                currentPiece = null;
-                SpawnPiece();
-            }
-            else
-            {
-                currentPiece.ResetPosition();
-                Piece temp = currentPiece;
-                currentPiece = heldPiece;
-                heldPiece = temp;
-            }
-            canHold = false;
-            return true;
+        if (!canHold)
+        { 
+            return false;
         }
-        return false;
+        
+        if (heldPiece == null)
+        {
+            currentPiece.ResetPosition();
+            heldPiece = currentPiece;
+            currentPiece = null;
+            SpawnPiece();
+        }
+        else
+        {
+            currentPiece.ResetPosition();
+            Piece temp = currentPiece;
+            currentPiece = heldPiece;
+            heldPiece = temp;
+        }
+        canHold = false;
+        return true;
     }
 
     // ---- Clear Lines --------------------------------------------------------------------------

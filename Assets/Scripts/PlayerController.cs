@@ -38,9 +38,9 @@ public class PlayerController : Board
             {
                 return;
             }
-            GUI();
             List<int> fullLines = GetFullLines();
             ClearLines(fullLines);
+            GUI();
         }
     }
 

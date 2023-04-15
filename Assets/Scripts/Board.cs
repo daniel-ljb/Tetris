@@ -260,13 +260,13 @@ public class Board : MonoBehaviour
                 combo = -1;
                 break;
             case 1:
-                score += 100;
+                score += 40;
                 break;
             case 2:
-                score += 300;
+                score += 100;
                 break;
             case 3:
-                score += 600;
+                score += 300;
                 break;
             default:
                 score += 1200;

@@ -184,7 +184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &422216320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -948,7 +948,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1198927010
 Transform:
   m_ObjectHideFlags: 0
@@ -1010,6 +1010,14 @@ MonoBehaviour:
   combo: -1
   gameRunning: 0
   PieceHistory: 
+  bumpinessWeight: 0
+  blocksInRightColumnWeight: 0
+  pillarWeight: 0
+  holesWeight: 0
+  linesClearedNotTetrisWeight: 0
+  linesClearedTetrisWeight: 0
+  blocksAboveHolesWeight: 0
+  addedHeightWeight: 0
 --- !u!1 &1795929142
 GameObject:
   m_ObjectHideFlags: 0

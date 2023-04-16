@@ -58,7 +58,7 @@ public class Population2 : MonoBehaviour
         Camera.main.orthographicSize = height * 16;
     }
 
-    public void Update()
+    private void Update()
     {
         bool finishedGeneration = true;
         foreach (var aiBoard in AIBoards)

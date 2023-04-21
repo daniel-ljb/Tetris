@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 
 public class AIController2 : Board
@@ -15,9 +16,11 @@ public class AIController2 : Board
     public float linesClearedTetrisWeight;
     public float blocksAboveHolesWeight;
     public float addedHeightWeight;
+    public Leaderboard leaderboard;
 
     private void Start()
     {
+        leaderboard = GetComponent<Leaderboard>();
         linesCleared = 0;
         gameRunning = true;
 
@@ -95,10 +98,17 @@ public class AIController2 : Board
                 currentMove = null;
             }
         }
+
+        
         ClearLines(GetFullLines());
         GUI();
 
-        
+        if (!gameRunning & Time.time > timeDied + 5)
+        {
+            leaderboard.AddScore((int)score);
+            SceneManager.LoadScene("AI Board");
+        }
+
         /*
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {

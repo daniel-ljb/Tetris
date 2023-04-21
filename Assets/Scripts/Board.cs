@@ -7,6 +7,8 @@ using Random = UnityEngine.Random;
 
 public class Board : MonoBehaviour
 {
+    protected float timeDied;
+
     public PieceList pieceList;
     public Tilemap tilemap;
     public int lockDelay = 30;
@@ -76,6 +78,7 @@ public class Board : MonoBehaviour
         if (!CurrentPieceValid())
         {
             gameRunning = false;
+            timeDied = Time.time;
         }
     }
 
